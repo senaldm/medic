@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserResource;
+use App\Http\Resources\DataResource;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -24,7 +24,7 @@ class UserController extends Controller
                 return response()->json(['message'=>'There is no user has registered to the system yet.'],200);
             }
             
-            $userDetailsInJSON = UserResource::collection($userDetails);
+            $userDetailsInJSON = DataResource::collection($userDetails);
             
             return response()->json($userDetailsInJSON);
         }
