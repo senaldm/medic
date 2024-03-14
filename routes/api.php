@@ -26,10 +26,12 @@ Route::prefix('admin/user')->middleware('auth:api')->group(fn()=>[
     Route::post('/regiter',[UserController::class, 'store']),
     Route::post('/update/{id}',[UserController::class,'update']),
 
-    Route::get('/view',[UserController::class,'view']),
+    Route::get('/index',[UserController::class,'view']),
     Route::post('/remove',[UserController::class,'destroy']),
     
 ]);
+
+
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

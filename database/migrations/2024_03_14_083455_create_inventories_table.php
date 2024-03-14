@@ -14,9 +14,15 @@ return new class extends Migration
     public function up()
     {
         Schema::create('inventories', function (Blueprint $table) {
-            
-            $table->id();
+
+            $table->string('batch_no')->unique();
+            $table->string('name');
+            $table->string('seller_company');
+            $table->double('buying_price');
+            $table->double('sell_price');
+            $table->integer('quantity');
             $table->timestamps();
+            
         });
     }
 

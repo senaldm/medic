@@ -7,45 +7,58 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
+
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
      */
     public function index()
     {
+        try {
+
+            $userDetails = User::all();
+
+            if($userDetails->isEmpty()){
+            
+                return response()->json(['message'=>'There is no user has registered to the system yet.'],200);
+            }
+            
+            $userDetailsInJSON = UserResource::collection($userDetails);
+            
+            return response()->json($userDetailsInJSON);
+        }
+         
+        catch (\Throwable) {
         
+            return response()->json(['error' => 'Couldn\'t get the user data'], 500);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+  
 
+    //user login to the system
     public function login(Request $request){
+
         $credentials = $request->only('email','password');
+        
         if(Auth::attempt($credentials)){
+        
             return response()->json(['Login Successfully']);
         }
         else {
+        
             return response()->json(['Login Failure'],401);
         }
 
     }
-    public function create()
-    {
-        
-    }
+
+
 
     /**
      * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
+
     public function store(Request $request)
     {
         
@@ -61,8 +74,8 @@ class UserController extends Controller
             'age'=>'required_if:role,customer',
         
         ],
-    //if need can be customized the error message for each to each validation fails in above . 
-    );
+        //if need can be customized the error message for each to each validation fails in above . 
+        );
         $userData = $request->all();
         
 
@@ -81,37 +94,9 @@ class UserController extends Controller
 
     }
 
-   
-    public function view()
-    {
-        try {
-            $userDetails = User::all();
-            $userDetailsInJSON = UserResource::collection($userDetails);
-            return response()->json($userDetailsInJSON);
-        } catch (\Throwable ) {
-            return response()->json(['error'=>'Couldn\'t get the user data'],500);
-        }
-       
-        
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
@@ -148,18 +133,23 @@ class UserController extends Controller
         }
     }
 
+
+
     /**
      * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
+
     public function destroy($id)
     {
         try {
+          
             User::destroy($id);
+        
             return response()->json(['message'=>'User Removed Successfully.',200]);
-        } catch (\Throwable ) {
+        } 
+        
+        catch (\Throwable ) {
+          
             return response()->json(['error'=>'Couldn\'t to Remove User ']);
         }
         
