@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Http\Controllers;
+
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
 class UserController extends Controller
@@ -21,6 +24,17 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function login(Request $request){
+        $credentials = $request->only('email','password');
+        if(Auth::attempt($credentials)){
+            return response()->json(['Login Successfully']);
+        }
+        else {
+            return response()->json(['Login Failure'],401);
+        }
+
+    }
     public function create()
     {
         
@@ -50,29 +64,35 @@ class UserController extends Controller
     //if need can be customized the error message for each to each validation fails in above . 
     );
         $userData = $request->all();
-        $userData['password']=Hash::make($userData['password']);
-        $result=User::create($userData);
+        
 
-        if($result){
+        try {
+            $userData['password'] = Hash::make($userData['password']);
+            User::create($userData);
+        
             return response()->json(['message'=>'User Registered Successfully.',201]);
 
         }
-        else {
+        catch(\Throwable ) {
+
             return response()->json(['message'=>'Oops! Failed to Register the User.Try Again '],500);
         }
 
-        
+
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+   
+    public function view()
     {
-        //
+        try {
+            $userDetails = User::all();
+            $userDetailsInJSON = UserResource::collection($userDetails);
+            return response()->json($userDetailsInJSON);
+        } catch (\Throwable ) {
+            return response()->json(['error'=>'Couldn\'t get the user data'],500);
+        }
+       
+        
     }
 
     /**
@@ -95,7 +115,37 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $this->validate(
+            $request,
+            [
+                'name' => 'required',
+                'role' => 'required',
+                'email' => [
+                    'email',
+                    'unique:users,email',
+                    'required_if:role,manager,cashier'
+                ],
+                'password' => 'required_if:role,manager,cashier',
+                'age' => 'required_if:role,customer',
+
+            ],);
+
+        $userData=$request->all();
+        try {
+        $user=User::find($id);
+       
+            $user->name=$userData['name'];
+            $user->email=$userData['email'];
+            $user->role=$userData['role'];
+            $user->passoword=$userData['password'];
+            $user->age=$userData['age'];
+            $user->save();
+
+            return response()->json(['message'=>'User Updated Successfully.'],200);
+        }
+        catch(\Throwable ){
+            return response()->json(['error'=>'Oops! Couldn\'t Update the User Details'],500);
+        }
     }
 
     /**
@@ -106,6 +156,12 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            User::destroy($id);
+            return response()->json(['message'=>'User Removed Successfully.',200]);
+        } catch (\Throwable ) {
+            return response()->json(['error'=>'Couldn\'t to Remove User ']);
+        }
+        
     }
 }
