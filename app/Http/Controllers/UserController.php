@@ -21,7 +21,7 @@ class UserController extends Controller
 
             if($userDetails->isEmpty()){
             
-                return response()->json(['message'=>'There is no user has registered to the system yet.'],200);
+                return response()->json(['success'=>'There is no user has registered to the system yet.'],200);
             }
             
             $userDetailsInJSON = DataResource::collection($userDetails);
@@ -29,9 +29,9 @@ class UserController extends Controller
             return response()->json($userDetailsInJSON);
         }
          
-        catch (\Throwable) {
+        catch (\Throwable $th) {
         
-            return response()->json(['error' => 'Couldn\'t get the user data'], 500);
+            return response()->json(['error' => "Couldn\'t get the user details. Error was {$th->getMessage()}"], 500);
         }
     }
 
@@ -67,9 +67,9 @@ class UserController extends Controller
             'name'=>'required',
             'role' => 'required',
             'email'=>[
-                'email',
-                'unique:users,email',
-                'required_if:role,manager,cashier'],
+                    'required_if:role,manager,cashier',
+                    'email',
+                    'unique:users,email'],
             'password'=>'required_if:role,manager,cashier',
             'age'=>'required_if:role,customer',
         
@@ -86,9 +86,9 @@ class UserController extends Controller
             return response()->json(['message'=>'User Registered Successfully.',201]);
 
         }
-        catch(\Throwable ) {
+        catch(\Throwable $th) {
 
-            return response()->json(['message'=>'Oops! Failed to Register the User.Try Again '],500);
+            return response()->json(['message'=> "Oops! Failed to Register the User. Error was {$th->getMessage()}"],500);
         }
 
 
@@ -106,9 +106,10 @@ class UserController extends Controller
                 'name' => 'required',
                 'role' => 'required',
                 'email' => [
+                    'required_if:role,manager,cashier',
                     'email',
-                    'unique:users,email',
-                    'required_if:role,manager,cashier'
+                    'unique:users,email'
+                    
                 ],
                 'password' => 'required_if:role,manager,cashier',
                 'age' => 'required_if:role,customer',
@@ -116,20 +117,22 @@ class UserController extends Controller
             ],);
 
         $userData=$request->all();
+      
         try {
-        $user=User::find($id);
-       
-            $user->name=$userData['name'];
-            $user->email=$userData['email'];
-            $user->role=$userData['role'];
-            $user->passoword=$userData['password'];
-            $user->age=$userData['age'];
-            $user->save();
+            $user = User::findOrFail($id);
+            if (!$user) {
+                return response()->json(['error' => 'OOpsss! Cannot find the User . User might not be in the database. Trying again might work.'], 500);
+            }
 
-            return response()->json(['message'=>'User Updated Successfully.'],200);
-        }
-        catch(\Throwable ){
-            return response()->json(['error'=>'Oops! Couldn\'t Update the User Details'],500);
+            $user->update($userData);
+
+            return response()->json(['success' => 'Greate Job!  User details has been updated successfully'], 200);
+        } 
+        
+        catch (\Throwable $th) {
+        
+            return response()->json(['error' => "Sorry!! A Error occurs while user details updating. Error was {$th->getMessage()}. Try again."], 500);
+        
         }
     }
 
@@ -145,12 +148,12 @@ class UserController extends Controller
           
             User::destroy($id);
         
-            return response()->json(['message'=>'User Removed Successfully.',200]);
+            return response()->json(['success'=>'User Removed Successfully.',200]);
         } 
         
-        catch (\Throwable ) {
+        catch (\Throwable $th) {
           
-            return response()->json(['error'=>'Couldn\'t to Remove User ']);
+            return response()->json(['error'=>"Sorry! Unable to Remove User from . Error wa {$th->getMessage()} "]);
         }
         
     }
