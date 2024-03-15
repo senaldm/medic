@@ -121,9 +121,6 @@ class UserController extends Controller
       
         try {
             $user = User::findOrFail($id);
-            if (!$user) {
-                return response()->json(['error' => 'OOpsss! Cannot find the User . User might not be in the database. Trying again might work.'], 500);
-            }
 
             $user->update($userData);
 
@@ -163,16 +160,14 @@ class UserController extends Controller
 
     public function checkCustomer($id){
         try {
-            $customerIdCheck=User::findOrFail($id);
-            if(!$customerIdCheck)
-            {
-                return response()->json(['Error'=>'Enter valid customer Id again'],200);
-            }
-            return response()->json(['success'=>'Customer Id is correct'],200);
+            
+            User::findOrFail($id);
+
+            return response()->json(['success'=>'Customer is found'],200);
         } 
         
         catch (\Throwable $th) {
-            return response()->json(['Error'=>"Server Error. {$th->getMessage()}"],500);
+            return response()->json(['Error'=>$th->getMessage()],500);
         }
     }
 }
