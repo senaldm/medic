@@ -20,6 +20,6 @@ class Inventory extends Model
     ];
 
 
-    protected $primaryKey='batch_no';
+   
     
 }
