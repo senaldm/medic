@@ -14,7 +14,12 @@ return new class extends Migration
     public function up()
     {
         Schema::create('customer_drug_details', function (Blueprint $table) {
-            $table->id();
+            $table->integer('customer_id')->primary();
+            $table->string('customer_name');
+            $table->string('drug_no');
+            $table->string('drug_name');
+            $table->integer('quantity');
+            $table->date('purchase_date')->now();
             $table->timestamps();
         });
     }

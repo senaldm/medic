@@ -5,16 +5,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
 
 // User login to the system
 
@@ -53,9 +43,9 @@ Route::prefix('cashier/medicine')->middleware('auth:api')->group(fn()=>[
     
     //  here following routes are related to sell the medicine by cashier to the customer which leads to the update/edit the inventory table and customer_buying_history table
 
-    Route::post('/sell-medicine',[InventoryController::class,'sell'])
-
-
+    Route::post('/sell-medicine',[InventoryController::class,'sell']),
+    Route::post('/check -quantity -avaliable/{$id}/{$quantity}',[InventoryController::class, 'checkQuatity']),
+    Route::post('/check-customer/{$id}',[UserController::class,'checkCustomer']),
 
 ]);
 

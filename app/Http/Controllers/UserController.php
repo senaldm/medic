@@ -158,4 +158,21 @@ class UserController extends Controller
         }
         
     }
+
+
+
+    public function checkCustomer($id){
+        try {
+            $customerIdCheck=User::findOrFail($id);
+            if(!$customerIdCheck)
+            {
+                return response()->json(['Error'=>'Enter valid customer Id again'],200);
+            }
+            return response()->json(['success'=>'Customer Id is correct'],200);
+        } 
+        
+        catch (\Throwable $th) {
+            return response()->json(['Error'=>"Server Error. {$th->getMessage()}"],500);
+        }
+    }
 }

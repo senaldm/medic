@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\DataResource;
+use App\Models\CustomerDrugDetails;
 use App\Models\Inventory;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -153,37 +155,47 @@ class InventoryController extends Controller
         $data=$request->json()->all();
 
         $userId=$data['customer_id'];
+        $customerName = User::where('customer_id', $userId)->value('customer_name');
+
         $purchase_date=$data["purchase_date"];
 
         foreach ($data['mediList'] as $medicine ) {
 
+
             try {
+                $drugName = Inventory::where('batch_no', $medicine['batch_no'])->value('name');
             
                 Inventory::where('batch_no', $medicine['batch_no'])->decrement('quantity', $medicine['quantity']);
 
-                $feedback[] = 'Greate! Medicine details has been updated successfully';
+                // Add customer drug details
+                
+                
+                $drugDetails['customer_id'] = $userId;
+                $drugDetails['customer_name'] = $customerName;
+                $drugDetails['drug_no'] = $medicine['batch_no'];
+                $drugDetails['drug_name'] = $drugName;
+                $drugDetails['quantity'] = $medicine['quantity'];
+                $drugDetails['purchase_date'] = $purchase_date;
 
 
-                
-                     
-               
-                
-                
-                    
-                    
+                CustomerDrugDetails::create($drugDetails);
+
+                $feedback[] = "Greate! Medicine details and customer history details for {$drugName} has been updated successfully";
 
                 }
-               
                 
-
-                // return response()->json(['success' => 'Greate! Medicine details has been updated successfully'], 200);
-            // }
              catch (\Throwable $th) {
-                return response()->json(['error' => "Sorry!! A Error occurs while medicine details updating. Error was {$th->getMessage()}. Try again."], 500);
+                $feedback[] = "Oops! Medicine details and customer history details for {$drugName} hasn\'t been updated. Error is {$th->getMessage()}";
             }
         }
+        if ($feedback->isEmpty()) {
+            return response()->json(['Error'=>'Undefined error. Try again']);
+        }
+        return response()->json(200);
     }
 
+
+    
 
 
     //Destroy specific medicine 
