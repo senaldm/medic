@@ -18,7 +18,7 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        if(Auth::user()->role=='admin' || Auth::user()->role=='manager')
+        if(Auth::user()->role=='admin' || Auth::user()->role=='cashier')
         try{
             
             $inventory = Inventory::all();
@@ -89,6 +89,7 @@ class InventoryController extends Controller
 
     public function update(Request $request, $id)
     {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier'){
         $this->validate(
             $request,
             [
@@ -125,6 +126,10 @@ class InventoryController extends Controller
         catch (\Throwable $th) {
             return response()->json(['error'=>"Sorry!! A Error occurs while medicine details updating. Error was {$th->getMessage()}. Try again."],500);
         }
+    }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
 
     }
         
@@ -133,6 +138,7 @@ class InventoryController extends Controller
    
 
     public function  checkQuatity($id,$requestQuantity) {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier'){
         try {
             
             $existingQuantity = Inventory::where('batch_no', $id)->value('quantity');
@@ -149,6 +155,11 @@ class InventoryController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['error' => "Oops!! Something is wrong. The Error is {$th->getMessage()}", 500]);
         }
+    }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+
+    }
         
         
     /*sell the items to the customers
@@ -159,6 +170,7 @@ class InventoryController extends Controller
         
     }
     public function sell(Request $request){
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier') {
       
         $this->validate($request,[
             'customer_id'=>'required',
@@ -207,6 +219,10 @@ class InventoryController extends Controller
         }
         return response()->json(200);
     }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
+    }
 
 
     
@@ -215,6 +231,7 @@ class InventoryController extends Controller
     //Destroy specific medicine 
     public function destroy($id)
     {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier') {
         try {
 
             Inventory::destroy($id);
@@ -224,6 +241,11 @@ class InventoryController extends Controller
         catch (\Throwable $th) {
             return response()->json(['error'=>"Oops ! Error encounting while removing details.Try again. Error was {$th->getMessage()}"],500);
         }
+    }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+
+    }
            
     }
 

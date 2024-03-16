@@ -49,7 +49,7 @@ Route::prefix('cashier/medicine')->middleware('auth:sanctum')->group(fn()=>[
     //  here following routes are related to sell the medicine by cashier to the customer which leads to the update/edit the inventory table and customer_buying_history table
 
     Route::post('/sell-medicine',[InventoryController::class,'sell']),
-    Route::post('/check -quantity -avaliable/{$id}/{$quantity}',[InventoryController::class, 'checkQuatity']),
+    Route::post('/check-quantity-avaliable/{$id}/{$quantity}',[InventoryController::class, 'checkQuatity']),
     Route::post('/check-customer/{$id}',[UserController::class,'checkCustomer']),
 
 ]);

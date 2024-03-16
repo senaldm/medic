@@ -31,7 +31,7 @@ class AuthController extends Controller
                     'email',
                     'unique:users,email'
                 ],
-                'password' => ['required_if:role,manager,cashier','confirmed'],
+                'password' => ['required_if:role,manager,cashier'],
                 'age' => 'required_if:role,customer',
 
             ],

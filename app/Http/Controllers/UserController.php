@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use Illuminate\Http\Request;
 use App\Models\User;
-
+use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     /**
@@ -13,6 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'manager') {
         try {
 
             $userDetails = User::all();
@@ -32,6 +33,10 @@ class UserController extends Controller
             return response()->json(['error' => "Couldn\'t get the user details. Error was {$th->getMessage()}"], 500);
         }
     }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
+    }
 
 
     /**
@@ -39,6 +44,7 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'manager') {
         $this->validate(
             $request,
             [
@@ -71,6 +77,10 @@ class UserController extends Controller
         
         }
     }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
+    }
 
 
 
@@ -80,6 +90,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'manager') {
         try {
           
             User::destroy($id);
@@ -91,12 +102,16 @@ class UserController extends Controller
           
             return response()->json(['error'=>"Sorry! Unable to Remove User from . Error wa {$th->getMessage()} "]);
         }
-        
+    }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
     }
 
 
 
     public function checkCustomer($id){
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier'|| Auth::user()->role == 'mananger') {
         try {
             
             User::findOrFail($id);
@@ -107,5 +122,9 @@ class UserController extends Controller
         catch (\Throwable $th) {
             return response()->json(['Error'=>$th->getMessage()],500);
         }
+    }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
     }
 }
