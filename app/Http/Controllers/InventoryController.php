@@ -6,6 +6,7 @@ use App\Http\Resources\DataResource;
 use App\Models\CustomerDrugDetails;
 use App\Models\Inventory;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class InventoryController extends Controller
@@ -17,6 +18,7 @@ class InventoryController extends Controller
      */
     public function index()
     {
+        if(Auth::user()->role=='admin' || Auth::user()->role=='manager')
         try{
             
             $inventory = Inventory::all();
@@ -34,6 +36,10 @@ class InventoryController extends Controller
 
             return response()->json(['error' => 'Couldn\'t get the Inventory Data'], 500);
         }
+        else {
+
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+        }
     }
 
  
@@ -43,6 +49,8 @@ class InventoryController extends Controller
      */
     public function store(Request $request)
     {
+        if(Auth::user()->role=='admin'){
+
         $this->validate($request,[
             'batch_no'=>['required',
                         'unique:inventories,batch_no',],
@@ -68,6 +76,12 @@ class InventoryController extends Controller
 
             return response()->json(['error' => "ERRORR!! {$th->getMessage()} "], 500);
         }
+    }
+    else {
+     
+        return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
+
     }
 
   

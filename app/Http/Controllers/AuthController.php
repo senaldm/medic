@@ -17,7 +17,10 @@ class AuthController extends Controller
 
     public function store(Request $request)
     {
-
+        
+        if (Auth::user()->role=='admin') {
+        
+        
         $this->validate(
             $request,
             [
@@ -41,16 +44,22 @@ class AuthController extends Controller
             $userData['password'] = Hash::make($userData['password']);
             $user= User::create($userData);
 
-            $token = $user->createToken('authToken')->plainTextToken;
+            // $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json(['message' => 'User Registered Successfully.',
-                                    'token'=>$token],201);
+                                    'user details'=>$user
+                                    // 'token'=>$token
+                                ],201);
         } 
         
         catch (\Throwable $th) {
 
             return response()->json(['message' => "Oops! Failed to Register the User. Error was {$th->getMessage()}"], 500);
         }
+    }
+    else {
+            return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);
+    }
     }
 
 
@@ -60,17 +69,32 @@ class AuthController extends Controller
     {
 
         $credentials = $request->only('email', 'password');
+        try {
 
-        if (Auth::attempt($credentials)) {
+            if (Auth::attempt($credentials)) {
 
-            $user = Auth::user();
+                $user = Auth::user();
 
-            $token = $user->createToken('authToken')->plainTextToken;
+                $token = $request->user()->createToken('authToken')->plainTextToken;
 
-            return response()->json($user);
-        } else {
+                return response()->json([
+                    'token' => $token,
+                    'message' => "Welcome back {$user->name}"
+                ]);
+            } else {
 
-            return response()->json(['message' => 'Login Failure'], 401);
+                return response()->json(['message' => 'Login Failure'], 401);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['message' => "Error is {$th->getMessage()}"], 500);
         }
+      
+    }
+
+    public function logout(){
+
+        // $request->user()->tokens()->delete();
+        Auth::logout();
+
     }
 }
