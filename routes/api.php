@@ -63,6 +63,6 @@ Route::prefix('manager/user')->middleware('auth:sanctum')->group(fn()=>[
     Route::post('remove-customer/{id}',[UserController::class,'destroy']),
 ]);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
