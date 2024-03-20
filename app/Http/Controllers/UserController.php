@@ -6,6 +6,7 @@ use App\Http\Resources\DataResource;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     /**
@@ -65,7 +66,9 @@ class UserController extends Controller
       
         try {
             $user = User::findOrFail($id);
-
+                if ($request->has('password')) {
+                    $userData['password'] = Hash::make($userData['password']);
+                }
             $user->update($userData);
 
             return response()->json(['success' => 'Greate Job!  User details has been updated successfully'], 200);
@@ -92,10 +95,15 @@ class UserController extends Controller
     {
         if (Auth::user()->role == 'admin' || Auth::user()->role == 'manager') {
         try {
-          
+            if(User::findOrFail($id))
+            {
             User::destroy($id);
         
-            return response()->json(['success'=>'User Removed Successfully.',200]);
+            return response()->json(['success'=>'User Removed Successfully.'],200);
+            }
+            else {
+                return response()->json(['error'=>'couldn\'t find the user'],200);
+            }
         } 
         
         catch (\Throwable $th) {
@@ -111,12 +119,18 @@ class UserController extends Controller
 
 
     public function checkCustomer($id){
-        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier'|| Auth::user()->role == 'mananger') {
+        if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier') {
         try {
             
-            User::findOrFail($id);
+            if(User::where('id',$id)->where('role','customer')->get()){
+
+            
 
             return response()->json(['success'=>'Customer is found'],200);
+            }
+            else {
+                return response()->json(['error'=>'couldn\'t find the customer. Check the customer ID again. ']);
+            }
         } 
         
         catch (\Throwable $th) {

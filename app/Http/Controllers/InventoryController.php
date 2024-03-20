@@ -8,7 +8,6 @@ use App\Models\Inventory;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-
 class InventoryController extends Controller
 {
     /**
@@ -90,22 +89,21 @@ class InventoryController extends Controller
     public function update(Request $request, $id)
     {
         if (Auth::user()->role == 'admin' || Auth::user()->role == 'cashier'){
-        $this->validate(
-            $request,
-            [
-                'batch_no' => [
-                    'required',
-                    'unique:inventories,batch_no',
+           
+           
+            $this->validate(
+                $request,
+                [
+                    'batch_no' => 'required',
+                    'name' => 'required',
+                    'seller_company' => 'required',
+                    'buying_price' => 'required',
+                    'sell_price' => 'required',
+                    'quantity' => 'required',
+
+
                 ],
-                'name' => 'required',
-                'seller_company' => 'required',
-                'buying_price' => 'required',
-                'sell_price' => 'required',
-                'quantity' => 'required',
-
-
-            ],
-        );
+            );
 
         $inventoryData=$request->all();
 
@@ -144,16 +142,16 @@ class InventoryController extends Controller
             $existingQuantity = Inventory::where('batch_no', $id)->value('quantity');
 
             If($existingQuantity>$requestQuantity){
-                return response()->json(['success'=>'This quantity can be provided',200]);
+                return response()->json(['success'=>'This quantity can be provided'],200);
             }
-            else if ($existingQuantity=$requestQuantity) {
-                return response()->json(['success' => 'This quantity can be provided. This bulk will be finished with this request.', 200]);
+            else if ($existingQuantity==$requestQuantity) {
+                return response()->json(['success' => 'This quantity can be provided. This bulk will be finished with this request.'],200);
             }
             else {
-                return response()->json(['error' => 'Sorry!! We don\'t have that much on this medicine', 200]);
+                return response()->json(['error' => 'Sorry!! We don\'t have that much on this medicine'],200);
             }
         } catch (\Throwable $th) {
-            return response()->json(['error' => "Oops!! Something is wrong. The Error is {$th->getMessage()}", 500]);
+            return response()->json(['error' => "Oops!! Something is wrong. The Error is {$th->getMessage()}"],500);
         }
     }
     else {
@@ -180,21 +178,22 @@ class InventoryController extends Controller
         ]);
         $data=$request->json()->all();
 
-        $userId=$data['customer_id'];
-        $customerName = User::where('customer_id', $userId)->value('customer_name');
-
+        $userId= $data['customer_id'];
+      
         $purchase_date=$data["purchase_date"];
+
+        $customerName = User::where('id', $userId)->where('role', 'customer')->value('name');
 
         foreach ($data['mediList'] as $medicine ) {
 
 
             try {
-                $drugName = Inventory::where('batch_no', $medicine['batch_no'])->value('name');
-            
-                Inventory::where('batch_no', $medicine['batch_no'])->decrement('quantity', $medicine['quantity']);
-
-                // Add customer drug details
+                $drugName = Inventory::where('batch_no', $medicine['batch_no'])->value('name');                 
                 
+                Inventory::where('batch_no', $medicine['batch_no'])->decrese('quantity',$medicine['quantity']);
+                
+                // Add customer drug details
+           
                 
                 $drugDetails['customer_id'] = $userId;
                 $drugDetails['customer_name'] = $customerName;
@@ -211,13 +210,14 @@ class InventoryController extends Controller
                 }
                 
              catch (\Throwable $th) {
-                $feedback[] = "Oops! Medicine details and customer history details for {$drugName} hasn\'t been updated. Error is {$th->getMessage()}";
+                $feedback[] = "Oops! Medicine details and customer history details for {$drugName} hasn't been updated. Error is {$th->getMessage()}";
             }
         }
-        if ($feedback->isEmpty()) {
+        if (empty($feedback)) {
             return response()->json(['Error'=>'Undefined error. Try again']);
         }
-        return response()->json(200);
+        return response()->json(['Success'=>'Sell process completed',
+                                'feedback for the medicine and customer'=>$feedback],200);
     }
     else {
             return response()->json(['error' => "You are not permitted to this operation. Try again with authorized access."], 401);

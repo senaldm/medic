@@ -24,14 +24,6 @@ class AdminSeeder extends Seeder
         ]
 
         );
-        User::create(
-            [
-                'name' => 'cashier123',
-                'email' => 'cashier123@gmail.com',
-                'role' => 'cashier',
-                'password' => Hash::make('cashier123')
-            ]
-
-        );
+     
     }
 }

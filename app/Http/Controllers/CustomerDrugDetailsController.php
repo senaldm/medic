@@ -24,7 +24,6 @@ class CustomerDrugDetailsController extends Controller
         } 
         catch (\Throwable $th) {
 
-
             return response()->json(['error' => $th->getMessage()], 500);
         }
     }
