@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Route;
 // User login to the system
 
 Route::post('/user/login',[AuthController::class,'login']);
-Route::post('/logout',[AuthController::class,'logout']);
+
+Route::post('/logout',[AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 //admin routes for user in the system
 
-Route::prefix('/admin/user')->middleware('auth:sanctum')->group(fn()=>[
+Route::prefix('admin/user')->middleware('auth:sanctum')->group(fn()=>[
     
     Route::post('/register',[AuthController::class, 'store']),
     Route::post('/update-user/{id}',[UserController::class,'update']),

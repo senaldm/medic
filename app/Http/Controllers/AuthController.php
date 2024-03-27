@@ -94,10 +94,21 @@ class AuthController extends Controller
       
     }
 
-    public function logout(){
-
-        // $request->user()->tokens()->delete();
-        Auth::logout();
+    public function logout(Request $request){
+        try {
+            if ($request->user()->tokens()->count()>0) {
+                $request->user()->tokens()->delete();
+                return response()->json(['message' => 'Logout successfully'], 200);
+            }
+            else {
+                return response()->json(['message' => 'You have to login first'], 200);
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['message' => 'You have to login first'], 200);
+        }
+        
+        
+       
 
     }
 }
