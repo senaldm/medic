@@ -47,6 +47,7 @@ class AuthController extends Controller
           
             $user= User::create($userData);
 
+            //if user register by himself
             // $token = $user->createToken('authToken')->plainTextToken;
 
             return response()->json(['message' => 'User Registered Successfully.',
